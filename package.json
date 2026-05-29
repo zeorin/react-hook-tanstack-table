@@ -1,0 +1,99 @@
+{
+  "name": "react-hook-tanstack-table",
+  "packageManager": "yarn@4.15.0",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "Rules-of-React respecting bindings for TanStack Table.",
+  "author": "Xandor Schiefer <me@xandor.co.za>",
+  "license": "MIT",
+  "homepage": "https://github.com/zeorin/react-hook-tanstack-table/?tab=readme-ov-file#readme-ov-file",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zeorin/react-hook-tanstack-table.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zeorin/react-hook-tanstack-table/issues"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./TableContext": {
+      "import": "./dist/TableContext.js",
+      "require": "./dist/TableContext.cjs"
+    },
+    "./useCell": {
+      "import": "./dist/useCell.js",
+      "require": "./dist/useCell.cjs"
+    },
+    "./useColumn": {
+      "import": "./dist/useColumn.js",
+      "require": "./dist/useColumn.cjs"
+    },
+    "./useHeader": {
+      "import": "./dist/useHeader.js",
+      "require": "./dist/useHeader.cjs"
+    },
+    "./useReactTable": {
+      "import": "./dist/useReactTable.js",
+      "require": "./dist/useReactTable.cjs"
+    },
+    "./useRow": {
+      "import": "./dist/useRow.js",
+      "require": "./dist/useRow.cjs"
+    },
+    "./useTable": {
+      "import": "./dist/useTable.js",
+      "require": "./dist/useTable.cjs"
+    },
+    "./useTableWithSelector": {
+      "import": "./dist/useTableWithSelector.js",
+      "require": "./dist/useTableWithSelector.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "play": "vite",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit",
+    "release": "bumpp",
+    "prepublishOnly": "yarn run build"
+  },
+  "peerDependencies": {
+    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/table-core": "^8.21.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/table-core": "^8.21.3",
+    "@tsconfig/strictest": "^2.0.8",
+    "@types/node": "^25.6.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/browser-playwright": "^4.1.5",
+    "bumpp": "^11.1.0",
+    "tsdown": "^0.22.0",
+    "type-fest": "^5.6.0",
+    "typescript": "^6.0.3",
+    "typescript-language-server": "^5.3.0",
+    "vite": "^8.0.11",
+    "vitest": "^4.1.5",
+    "vitest-browser-react": "^2.2.0"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts"
+}
