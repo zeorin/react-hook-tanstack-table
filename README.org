@@ -1,0 +1,29 @@
+* React Hook TanStack Table
+
+[[https://react.dev/reference/rules][Rules of React]] respecting bindings for [[https://tanstack.com/table][TanStack Table]].
+
+** Development
+
+- Install dependencies:
+
+#+begin_src shell
+yarn install
+#+end_src
+
+- Run the playground:
+
+#+begin_src shell
+yarn run play
+#+end_src
+
+- Run the unit tests:
+
+#+begin_src shell
+yarn run test
+#+end_src
+
+- Build the library:
+
+#+begin_src shell
+yarn run build
+#+end_src
