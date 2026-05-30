@@ -76,3 +76,7 @@ const Cell = ({ column, rowId }: { columnId: string, rowId: string }) => {
 	const cellValue = useCell({ column: columnId, row: rowId }, (cell) => cell.value)
 }
 ```
+
+## See also
+
+If you use [TanStack Virtual](https://tanstack.com/Virtual), you may be interested in our sister package, [`react-hook-tanstack-virtual`](https://www.npmjs.com/package/react-hook-tanstack-virtual).
