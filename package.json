@@ -2,7 +2,7 @@
   "name": "react-hook-tanstack-table",
   "packageManager": "yarn@4.15.0",
   "type": "module",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Rules-of-React respecting bindings for TanStack Table.",
   "author": "Xandor Schiefer <me@xandor.co.za>",
   "license": "MIT",
