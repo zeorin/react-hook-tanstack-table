@@ -5,7 +5,6 @@ export { TableContext } from "./contexts/TableContext"
 
 export { useReactTable } from "./hooks/useReactTable"
 
-export { useTableWithSelector } from './hooks/useTableWithSelector'
 export { useTable, useTableʹ } from "./hooks/useTable"
 export { useHeader, useHeaderʹ } from "./hooks/useHeader"
 export { useColumn, useColumnʹ } from "./hooks/useColumn"

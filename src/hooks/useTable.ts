@@ -14,15 +14,15 @@ import { hasTableArg } from "../lib/hasTableArg"
 
 import type { IsEqual, RunGetters } from "../types"
 
-import { useTableWithSelector } from "./useTableWithSelector"
+import { useTableBase } from "../lib/useTableBase"
 
-export interface TableValues<TData extends RowData> extends RunGetters<
+export interface TableSnapshot<TData extends RowData> extends RunGetters<
   Table<TData>
 > {}
 
-const tableValuesCache = new WeakMap<
+const tableSnapshotCache = new WeakMap<
   RequiredKeys<TableOptionsResolved<any>, "state">,
-  TableValues<any>
+  TableSnapshot<any>
 >()
 
 const tableHandlersCache = new WeakMap<
@@ -43,10 +43,10 @@ const tableHandlersCache = new WeakMap<
   }
 >()
 
-const getTableValues = <TData extends RowData>(
+const getTableSnapshot = <TData extends RowData>(
   table: Table<TData>,
-): TableValues<TData> => {
-  let cached = tableValuesCache.get(table.options)
+): TableSnapshot<TData> => {
+  let cached = tableSnapshotCache.get(table.options)
   if (!cached) {
     let cachedHandlers = tableHandlersCache.get(table)
     if (!cachedHandlers) {
@@ -79,16 +79,16 @@ const getTableValues = <TData extends RowData>(
       toggleAllRowsExpandedHandler,
       toggleAllRowsSelectedHandler,
     }
-    tableValuesCache.set(table.options, cached)
+    tableSnapshotCache.set(table.options, cached)
   }
   return cached
 }
 
 type Selector<TData extends RowData, Selection> = (
-  tableValues: TableValues<TData>,
+  tableSnapshot: TableSnapshot<TData>,
 ) => Selection
 
-export const useTable = <TData extends RowData, Selection = TableValues<TData>>(
+export const useTable = <TData extends RowData, Selection = TableSnapshot<TData>>(
   ...args:
     | [
         table: Table<TData> | undefined,
@@ -107,18 +107,18 @@ export const useTable = <TData extends RowData, Selection = TableValues<TData>>(
   ] = hasTableArg(args) ? args : [undefined, ...args]
 
   const getSelection = useCallback(
-    (table: Table<TData>) => selector(getTableValues(table)),
+    (table: Table<TData>) => selector(getTableSnapshot(table)),
     [selector],
   )
 
-  return useTableWithSelector(table, getSelection, isEqual)
+  return useTableBase(table, getSelection, isEqual)
 }
 
 const tableHook = useTable
 
 const tableHookʹ =
   <TData extends RowData>(table?: Table<TData> | undefined) =>
-  <Selection = TableValues<TData>>(
+  <Selection = TableSnapshot<TData>>(
     selector?: Selector<TData, Selection> | undefined,
     isEqual?: IsEqual<NoInfer<Selection>> | undefined
   ): Selection =>

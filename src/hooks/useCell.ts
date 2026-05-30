@@ -18,28 +18,28 @@ import { invariant } from "../lib/invariant"
 
 import type { IsEqual, RunGetters } from "../types"
 
-import type { ColumnValues } from "./useColumn"
-import type { RowValues } from "./useRow"
-import { useTableWithSelector } from "./useTableWithSelector"
+import type { ColumnSnapshot } from "./useColumn"
+import type { RowSnapshot } from "./useRow"
+import { useTableBase } from "../lib/useTableBase"
 
-export interface CellValues<TData extends RowData, TValue> extends RunGetters<
+export interface CellSnapshot<TData extends RowData, TValue> extends RunGetters<
   Cell<TData, TValue>
 > {}
 
-const cellValuesCache = new WeakMap<
+const cellSnapshotCache = new WeakMap<
   RequiredKeys<TableOptionsResolved<any>, "state">,
-  Map<string, Map<string, CellValues<any, any>>>
+  Map<string, Map<string, CellSnapshot<any, any>>>
 >()
 
-const getCellValues = <TData extends RowData, TValue>(
+const getCellSnapshot = <TData extends RowData, TValue>(
   table: Table<TData>,
   rowId: string,
   columnId: string,
-): CellValues<TData, TValue> => {
-  let cellCache = cellValuesCache.get(table.options)
+): CellSnapshot<TData, TValue> => {
+  let cellCache = cellSnapshotCache.get(table.options)
   if (!cellCache) {
     cellCache = new Map()
-    cellValuesCache.set(table.options, cellCache)
+    cellSnapshotCache.set(table.options, cellCache)
   }
 
   let rowCache = cellCache.get(rowId)
@@ -67,25 +67,25 @@ const getCellValues = <TData extends RowData, TValue>(
 }
 
 type Selector<TData extends RowData, TValue, Selection> = (
-  cellValues: CellValues<TData, TValue>,
+  cellSnapshot: CellSnapshot<TData, TValue>,
 ) => Selection
 
 interface CellCoords<TData extends RowData, TValue> {
-  column: Column<TData, TValue> | ColumnValues<TData> | string
-  row: Row<TData> | RowValues<TData> | string
+  column: Column<TData, TValue> | ColumnSnapshot<TData> | string
+  row: Row<TData> | RowSnapshot<TData> | string
 }
 
 export const useCell = <
   TData extends RowData,
   TValue,
-  Selection = CellValues<TData, TValue>,
+  Selection = CellSnapshot<TData, TValue>,
 >(
   ...args:
     | [
         table: Table<TData> | undefined,
         cell:
           | Cell<TData, TValue>
-          | CellValues<TData, TValue>
+          | CellSnapshot<TData, TValue>
           | CellCoords<TData, TValue>,
         selector?: Selector<TData, TValue, Selection> | undefined,
         isEqual?: IsEqual<NoInfer<Selection>> | undefined,
@@ -93,7 +93,7 @@ export const useCell = <
     | [
         cell:
           | Cell<TData, TValue>
-          | CellValues<TData, TValue>
+          | CellSnapshot<TData, TValue>
           | CellCoords<TData, TValue>,
         selector?: Selector<TData, TValue, Selection> | undefined,
         isEqual?: IsEqual<NoInfer<Selection>> | undefined,
@@ -121,11 +121,11 @@ export const useCell = <
       }
 
   const getSelection = useCallback(
-    (table: Table<TData>) => selector(getCellValues(table, rowId, columnId)),
+    (table: Table<TData>) => selector(getCellSnapshot(table, rowId, columnId)),
     [columnId, rowId, selector],
   )
 
-  return useTableWithSelector(table, getSelection, isEqual)
+  return useTableBase(table, getSelection, isEqual)
 }
 
 const cellHook = useCell
@@ -137,17 +137,17 @@ const cellHookʹ =
           table: Table<TData> | undefined,
           cell:
             | Cell<TData, TValue>
-            | CellValues<TData, TValue>
+            | CellSnapshot<TData, TValue>
             | CellCoords<TData, TValue>,
         ]
       | [
           cell:
             | Cell<TData, TValue>
-            | CellValues<TData, TValue>
+            | CellSnapshot<TData, TValue>
             | CellCoords<TData, TValue>,
         ]
   ) =>
-  <Selection = CellValues<TData, TValue>>(
+  <Selection = CellSnapshot<TData, TValue>>(
     selector?: Selector<TData, TValue, Selection> | undefined,
     isEqual?: IsEqual<NoInfer<Selection>> | undefined,
   ): Selection =>

@@ -16,15 +16,15 @@ import { invariant } from "../lib/invariant"
 
 import type { IsEqual, RunGetters } from "../types"
 
-import { useTableWithSelector } from "./useTableWithSelector"
+import { useTableBase } from "../lib/useTableBase"
 
-export interface HeaderValues<TData extends RowData, TValue> extends RunGetters<
+export interface HeaderSnapshot<TData extends RowData, TValue> extends RunGetters<
   Header<TData, TValue>
 > {}
 
-const headerValuesCache = new WeakMap<
+const headerSnapshotCache = new WeakMap<
   RequiredKeys<TableOptionsResolved<any>, "state">,
-  Map<string, HeaderValues<any, any>>
+  Map<string, HeaderSnapshot<any, any>>
 >()
 
 const headerHandlersCache = new WeakMap<
@@ -34,14 +34,14 @@ const headerHandlersCache = new WeakMap<
   }
 >()
 
-const getHeaderValues = <TData extends RowData, TValue>(
+const getHeaderSnapshot = <TData extends RowData, TValue>(
   table: Table<TData>,
   headerId: string,
-): HeaderValues<TData, TValue> => {
-  let headerCache = headerValuesCache.get(table.options)
+): HeaderSnapshot<TData, TValue> => {
+  let headerCache = headerSnapshotCache.get(table.options)
   if (!headerCache) {
     headerCache = new Map()
-    headerValuesCache.set(table.options, headerCache)
+    headerSnapshotCache.set(table.options, headerCache)
   }
 
   let cached = headerCache.get(headerId)
@@ -75,20 +75,20 @@ const getHeaderValues = <TData extends RowData, TValue>(
 }
 
 type Selector<TData extends RowData, TValue, Selection> = (
-  headerValues: HeaderValues<TData, TValue>,
+  headerSnapshot: HeaderSnapshot<TData, TValue>,
 ) => Selection
 
 export const useHeader = <
   TData extends RowData,
   TValue,
-  Selection = HeaderValues<TData, TValue>,
+  Selection = HeaderSnapshot<TData, TValue>,
 >(
   ...args:
     | [
         table: Table<TData> | undefined,
         header:
           | Header<TData, TValue>
-          | HeaderValues<TData, TValue>
+          | HeaderSnapshot<TData, TValue>
           | { id: string }
           | string,
         selector?: Selector<TData, TValue, Selection> | undefined,
@@ -97,7 +97,7 @@ export const useHeader = <
     | [
         header:
           | Header<TData, TValue>
-          | HeaderValues<TData, TValue>
+          | HeaderSnapshot<TData, TValue>
           | { id: string }
           | string,
         selector?: Selector<TData, TValue, Selection> | undefined,
@@ -114,11 +114,11 @@ export const useHeader = <
   const headerId = typeof headerOrId === "string" ? headerOrId : headerOrId.id
 
   const getSelection = useCallback(
-    (table: Table<TData>) => selector(getHeaderValues(table, headerId)),
+    (table: Table<TData>) => selector(getHeaderSnapshot(table, headerId)),
     [headerId, selector],
   )
 
-  return useTableWithSelector(table, getSelection, isEqual)
+  return useTableBase(table, getSelection, isEqual)
 }
 
 const headerHook = useHeader
@@ -130,19 +130,19 @@ const headerHookʹ =
           table: Table<TData> | undefined,
           header:
             | Header<TData, TValue>
-            | HeaderValues<TData, TValue>
+            | HeaderSnapshot<TData, TValue>
             | { id: string }
             | string,
         ]
       | [
           header:
             | Header<TData, TValue>
-            | HeaderValues<TData, TValue>
+            | HeaderSnapshot<TData, TValue>
             | { id: string }
             | string,
         ]
   ) =>
-  <Selection = HeaderValues<TData, TValue>>(
+  <Selection = HeaderSnapshot<TData, TValue>>(
     selector?: Selector<TData, TValue, Selection> | undefined,
     isEqual?: IsEqual<NoInfer<Selection>> | undefined,
   ): Selection =>

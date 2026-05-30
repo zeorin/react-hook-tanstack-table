@@ -16,13 +16,13 @@ import type {
 
 import { TableContext } from "../contexts/TableContext"
 
-import { identity } from "../lib/identity"
-import { tableRegistry } from "../lib/tableRegistry"
-import { invariant } from "../lib/invariant"
+import { identity } from "./identity"
+import { tableRegistry } from "./tableRegistry"
+import { invariant } from "./invariant"
 
 import type { IsEqual } from "../types"
 
-export const useTableWithSelector = <
+export const useTableBase = <
   TData extends RowData,
   Selection = Table<TData>,
 >(
@@ -36,7 +36,7 @@ export const useTableWithSelector = <
 
   invariant(
     resolvedTable,
-    "`useTableWithSelector` must be used as a descendent of `TableContext` or provided with a `Table` as an argument!",
+    "`useTableBase` must be used as a descendent of `TableContext` or provided with a `Table` as an argument!",
   )
 
   const listeners = useMemo(

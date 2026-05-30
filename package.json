@@ -47,10 +47,6 @@
       "import": "./dist/useTable.js",
       "require": "./dist/useTable.cjs"
     },
-    "./useTableWithSelector": {
-      "import": "./dist/useTableWithSelector.js",
-      "require": "./dist/useTableWithSelector.cjs"
-    },
     "./package.json": "./package.json"
   },
   "files": [

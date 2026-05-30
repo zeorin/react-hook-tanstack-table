@@ -16,16 +16,16 @@ import { invariant } from "../lib/invariant"
 
 import type { IsEqual, RunGetters } from "../types"
 
-import { useTableWithSelector } from "./useTableWithSelector"
+import { useTableBase } from "../lib/useTableBase"
 
-export interface ColumnValues<
+export interface ColumnSnapshot<
   TData extends RowData,
   TValue = unknown,
 > extends RunGetters<Column<TData, TValue>> {}
 
-const columnValuesCache = new WeakMap<
+const columnSnapshotCache = new WeakMap<
   RequiredKeys<TableOptionsResolved<any>, "state">,
-  Map<string, ColumnValues<any, any>>
+  Map<string, ColumnSnapshot<any, any>>
 >()
 
 const columnHandlersCache = new WeakMap<
@@ -43,14 +43,14 @@ const columnHandlersCache = new WeakMap<
   }
 >()
 
-const getColumnValues = <TData extends RowData, TValue = unknown>(
+const getColumnSnapshot = <TData extends RowData, TValue = unknown>(
   table: Table<TData>,
   columnId: string,
-): ColumnValues<TData, TValue> => {
-  let columnCache = columnValuesCache.get(table.options)
+): ColumnSnapshot<TData, TValue> => {
+  let columnCache = columnSnapshotCache.get(table.options)
   if (!columnCache) {
     columnCache = new Map()
-    columnValuesCache.set(table.options, columnCache)
+    columnSnapshotCache.set(table.options, columnCache)
   }
 
   let cached = columnCache.get(columnId)
@@ -92,20 +92,20 @@ const getColumnValues = <TData extends RowData, TValue = unknown>(
 }
 
 type Selector<TData extends RowData, TValue, Selection> = (
-  table: ColumnValues<TData, TValue>,
+  columnSnapshot: ColumnSnapshot<TData, TValue>,
 ) => Selection
 
 export const useColumn = <
   TData extends RowData,
   TValue = unknown,
-  Selection = ColumnValues<TData, TValue>,
+  Selection = ColumnSnapshot<TData, TValue>,
 >(
   ...args:
     | [
         table: Table<TData> | undefined,
         column:
           | Column<TData, TValue>
-          | ColumnValues<TData, TValue>
+          | ColumnSnapshot<TData, TValue>
           | { id: string }
           | string,
         selector?: Selector<TData, TValue, Selection> | undefined,
@@ -114,7 +114,7 @@ export const useColumn = <
     | [
         column:
           | Column<TData, TValue>
-          | ColumnValues<TData, TValue>
+          | ColumnSnapshot<TData, TValue>
           | { id: string }
           | string,
         selector?: Selector<TData, TValue, Selection> | undefined,
@@ -131,11 +131,11 @@ export const useColumn = <
   const columnId = typeof columnOrId === "string" ? columnOrId : columnOrId.id
 
   const getSelection = useCallback(
-    (table: Table<TData>) => selector(getColumnValues(table, columnId)),
+    (table: Table<TData>) => selector(getColumnSnapshot(table, columnId)),
     [columnId, selector],
   )
 
-  return useTableWithSelector(table, getSelection, isEqual)
+  return useTableBase(table, getSelection, isEqual)
 }
 
 const columnHook = useColumn
@@ -147,19 +147,19 @@ const columnHookʹ =
           table: Table<TData> | undefined,
           column:
             | Column<TData, TValue>
-            | ColumnValues<TData, TValue>
+            | ColumnSnapshot<TData, TValue>
             | { id: string }
             | string,
         ]
       | [
           column:
             | Column<TData, TValue>
-            | ColumnValues<TData, TValue>
+            | ColumnSnapshot<TData, TValue>
             | { id: string }
             | string,
         ]
   ) =>
-  <Selection = ColumnValues<TData, TValue>>(
+  <Selection = ColumnSnapshot<TData, TValue>>(
     selector?: Selector<TData, TValue, Selection> | undefined,
     isEqual?: IsEqual<NoInfer<Selection>> | undefined,
   ): Selection =>

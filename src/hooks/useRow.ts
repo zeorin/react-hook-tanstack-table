@@ -15,15 +15,15 @@ import { isShallowEqual } from "../lib/isShallowEqual"
 
 import type { IsEqual, RunGetters } from "../types"
 
-import { useTableWithSelector } from "./useTableWithSelector"
+import { useTableBase } from "../lib/useTableBase"
 
-export interface RowValues<TData extends RowData> extends RunGetters<
+export interface RowSnapshot<TData extends RowData> extends RunGetters<
   Row<TData>
 > {}
 
 const hookRowCache = new WeakMap<
   RequiredKeys<TableOptionsResolved<any>, "state">,
-  Map<string, RowValues<any>>
+  Map<string, RowSnapshot<any>>
 >()
 
 const rowHandlersCache = new WeakMap<
@@ -34,10 +34,10 @@ const rowHandlersCache = new WeakMap<
   }
 >()
 
-const getRowValues = <TData extends RowData>(
+const getRowSnapshot = <TData extends RowData>(
   table: Table<TData>,
   rowId: string,
-): RowValues<TData> => {
+): RowSnapshot<TData> => {
   let rowCache = hookRowCache.get(table.options)
   if (!rowCache) {
     rowCache = new Map()
@@ -78,19 +78,19 @@ const getRowValues = <TData extends RowData>(
 }
 
 type Selector<TData extends RowData, Selection> = (
-  rowValues: RowValues<TData>,
+  rowSnapshot: RowSnapshot<TData>,
 ) => Selection
 
-export const useRow = <TData extends RowData, Selection = RowValues<TData>>(
+export const useRow = <TData extends RowData, Selection = RowSnapshot<TData>>(
   ...args:
     | [
         table: Table<TData> | undefined,
-        row: Row<TData> | RowValues<TData> | { id: string } | string,
+        row: Row<TData> | RowSnapshot<TData> | { id: string } | string,
         selector?: Selector<TData, Selection> | undefined,
         isEqual?: IsEqual<NoInfer<Selection>> | undefined,
       ]
     | [
-        row: Row<TData> | RowValues<TData> | { id: string } | string,
+        row: Row<TData> | RowSnapshot<TData> | { id: string } | string,
         selector?: Selector<TData, Selection> | undefined,
         isEqual?: IsEqual<NoInfer<Selection>> | undefined,
       ]
@@ -105,11 +105,11 @@ export const useRow = <TData extends RowData, Selection = RowValues<TData>>(
   const rowId = typeof rowOrId === "string" ? rowOrId : rowOrId.id
 
   const getSelection = useCallback(
-    (table: Table<TData>) => selector(getRowValues(table, rowId)),
+    (table: Table<TData>) => selector(getRowSnapshot(table, rowId)),
     [rowId, selector],
   )
 
-  return useTableWithSelector(table, getSelection, isEqual)
+  return useTableBase(table, getSelection, isEqual)
 }
 
 const rowHook = useRow
@@ -119,11 +119,11 @@ const rowHookʹ =
     ...args:
       | [
           table: Table<TData> | undefined,
-          row: Row<TData> | RowValues<TData> | { id: string } | string,
+          row: Row<TData> | RowSnapshot<TData> | { id: string } | string,
         ]
-      | [row: Row<TData> | RowValues<TData> | { id: string } | string]
+      | [row: Row<TData> | RowSnapshot<TData> | { id: string } | string]
   ) =>
-  <Selection = RowValues<TData>>(
+  <Selection = RowSnapshot<TData>>(
     selector?: Selector<TData, Selection> | undefined,
     isEqual?: IsEqual<NoInfer<Selection>> | undefined,
   ): Selection =>
