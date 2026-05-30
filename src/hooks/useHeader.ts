@@ -34,6 +34,14 @@ const headerHandlersCache = new WeakMap<
   }
 >()
 
+const getHeader = <TData extends RowData, TValue>(table: Table<TData>, headerId: string) => {
+	const header = table.getFlatHeaders().find((h) => h.id === headerId) as
+		| Header<TData, TValue>
+		| undefined
+	invariant(header)
+	return header 
+}
+
 const getHeaderSnapshot = <TData extends RowData, TValue>(
   table: Table<TData>,
   headerId: string,
@@ -47,11 +55,7 @@ const getHeaderSnapshot = <TData extends RowData, TValue>(
   let cached = headerCache.get(headerId)
 
   if (!cached) {
-    const header = table.getFlatHeaders().find((h) => h.id === headerId) as
-      | Header<TData, TValue>
-      | undefined
-
-    invariant(header)
+    const header = getHeader<TData, TValue>(table, headerId)
 
     let cachedHandlers = headerHandlersCache.get(header)
     if (!cachedHandlers) {
@@ -76,6 +80,8 @@ const getHeaderSnapshot = <TData extends RowData, TValue>(
 
 type Selector<TData extends RowData, TValue, Selection> = (
   headerSnapshot: HeaderSnapshot<TData, TValue>,
+	header: Header<TData, TValue>,
+	table: Table<TData>
 ) => Selection
 
 export const useHeader = <
@@ -114,7 +120,11 @@ export const useHeader = <
   const headerId = typeof headerOrId === "string" ? headerOrId : headerOrId.id
 
   const getSelection = useCallback(
-    (table: Table<TData>) => selector(getHeaderSnapshot(table, headerId)),
+    (table: Table<TData>) => selector(
+			getHeaderSnapshot<TData, TValue>(table, headerId),
+			getHeader<TData, TValue>(table, headerId),
+			table
+		),
     [headerId, selector],
   )
 

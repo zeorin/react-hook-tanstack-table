@@ -43,6 +43,14 @@ const columnHandlersCache = new WeakMap<
   }
 >()
 
+const getColumn = <TData extends RowData, TValue = unknown>(table: Table<TData>, columnId: string) => {
+	const column = table.getColumn(columnId) as
+		| Column<TData, TValue>
+		| undefined
+	invariant(column)
+	return column
+}
+
 const getColumnSnapshot = <TData extends RowData, TValue = unknown>(
   table: Table<TData>,
   columnId: string,
@@ -56,11 +64,7 @@ const getColumnSnapshot = <TData extends RowData, TValue = unknown>(
   let cached = columnCache.get(columnId)
 
   if (!cached) {
-    const column = table.getColumn(columnId) as
-      | Column<TData, TValue>
-      | undefined
-
-    invariant(column)
+    const column = getColumn<TData, TValue>(table, columnId)
 
     let cachedHandlers = columnHandlersCache.get(column)
     if (!cachedHandlers) {
@@ -93,6 +97,8 @@ const getColumnSnapshot = <TData extends RowData, TValue = unknown>(
 
 type Selector<TData extends RowData, TValue, Selection> = (
   columnSnapshot: ColumnSnapshot<TData, TValue>,
+	column: Column<TData, TValue>,
+	table: Table<TData>
 ) => Selection
 
 export const useColumn = <
@@ -131,7 +137,11 @@ export const useColumn = <
   const columnId = typeof columnOrId === "string" ? columnOrId : columnOrId.id
 
   const getSelection = useCallback(
-    (table: Table<TData>) => selector(getColumnSnapshot(table, columnId)),
+    (table: Table<TData>) => selector(
+			getColumnSnapshot<TData, TValue>(table, columnId),
+			getColumn<TData, TValue>(table, columnId),
+			table
+		),
     [columnId, selector],
   )
 

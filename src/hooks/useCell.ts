@@ -31,6 +31,19 @@ const cellSnapshotCache = new WeakMap<
   Map<string, Map<string, CellSnapshot<any, any>>>
 >()
 
+const getCell = <TData extends RowData, TValue>(
+  table: Table<TData>,
+  rowId: string,
+  columnId: string,
+) => {
+	const cell = table
+		.getRow(rowId)
+		?.getAllCells()
+		.find((c) => c.column.id === columnId) as Cell<TData, TValue> | undefined
+	invariant(cell)
+	return cell
+}
+
 const getCellSnapshot = <TData extends RowData, TValue>(
   table: Table<TData>,
   rowId: string,
@@ -49,17 +62,9 @@ const getCellSnapshot = <TData extends RowData, TValue>(
   }
 
   let cached = rowCache.get(columnId)
-
   if (!cached) {
-    const cell = table
-      .getRow(rowId)
-      ?.getAllCells()
-      .find((c) => c.column.id === columnId) as Cell<TData, TValue> | undefined
-
-    invariant(cell)
-
+    const cell = getCell(table, rowId, columnId)
     cached = runGetters(cell)
-
     rowCache.set(columnId, cached)
   }
 
@@ -68,6 +73,8 @@ const getCellSnapshot = <TData extends RowData, TValue>(
 
 type Selector<TData extends RowData, TValue, Selection> = (
   cellSnapshot: CellSnapshot<TData, TValue>,
+  cell: Cell<TData, TValue>,
+  table: Table<TData>,
 ) => Selection
 
 interface CellCoords<TData extends RowData, TValue> {
@@ -121,7 +128,11 @@ export const useCell = <
       }
 
   const getSelection = useCallback(
-    (table: Table<TData>) => selector(getCellSnapshot(table, rowId, columnId)),
+    (table: Table<TData>) => selector(
+			getCellSnapshot<TData, TValue>(table, rowId, columnId),
+			getCell<TData, TValue>(table, rowId, columnId),
+			table
+		),
     [columnId, rowId, selector],
   )
 

@@ -79,6 +79,8 @@ const getRowSnapshot = <TData extends RowData>(
 
 type Selector<TData extends RowData, Selection> = (
   rowSnapshot: RowSnapshot<TData>,
+	row: Row<TData>,
+	table: Table<TData>
 ) => Selection
 
 export const useRow = <TData extends RowData, Selection = RowSnapshot<TData>>(
@@ -105,7 +107,11 @@ export const useRow = <TData extends RowData, Selection = RowSnapshot<TData>>(
   const rowId = typeof rowOrId === "string" ? rowOrId : rowOrId.id
 
   const getSelection = useCallback(
-    (table: Table<TData>) => selector(getRowSnapshot(table, rowId)),
+    (table: Table<TData>) => selector(
+			getRowSnapshot(table, rowId),
+			table.getRow(rowId),
+			table
+		),
     [rowId, selector],
   )
 

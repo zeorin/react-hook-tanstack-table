@@ -86,6 +86,7 @@ const getTableSnapshot = <TData extends RowData>(
 
 type Selector<TData extends RowData, Selection> = (
   tableSnapshot: TableSnapshot<TData>,
+	table: Table<TData>
 ) => Selection
 
 export const useTable = <TData extends RowData, Selection = TableSnapshot<TData>>(
@@ -107,7 +108,7 @@ export const useTable = <TData extends RowData, Selection = TableSnapshot<TData>
   ] = hasTableArg(args) ? args : [undefined, ...args]
 
   const getSelection = useCallback(
-    (table: Table<TData>) => selector(getTableSnapshot(table)),
+    (table: Table<TData>) => selector(getTableSnapshot(table), table),
     [selector],
   )
 
